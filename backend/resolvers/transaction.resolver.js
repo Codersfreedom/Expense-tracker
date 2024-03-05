@@ -1,8 +1,64 @@
-import { transactions } from "../dummyData/Data.js";
+import Transaction from "../models/transaction.model.js";
 
 const transactionResolver = {
+  Query: {
+    transactions: async (_, _, context) => {
+      try {
+        if (!context.getUser()) throw new Error("Unauthorized");
+        const userId = await context.getUser()._id;
 
- Query:{},
- Mutation:{}
-}
-export default transactionResolver ; 
+        const transactions = await Transaction.find({ userId });
+        return transactions;
+      } catch (error) {
+        console.error("Error in getting transactions:", error);
+        throw new Error(error.message || "Internal server error");
+      }
+    },
+    transaction: async (_, { transactionId }) => {
+      try {
+        const transaction = await Transaction.findById(transactionId);
+        return transaction;
+      } catch (error) {
+        console.error("Error in getting transaction:", error);
+        throw new Error(error.message || "Internal server error");
+      }
+    },
+    //? Todo -> add categoryStatistics
+  },
+  Mutation: {
+    createTransaction: async (_, { input }, context) => {
+      try {
+        const newTransaction = new Transaction({
+          ...input,
+          userId: context.getUser()._id,
+        });
+
+        await newTransaction.save();
+        return newTransaction;
+      } catch (error) {
+        console.error("Error in CreateTransaction:", error);
+        throw new Error(error.message || "Internal server error");
+      }
+    },
+    updateTransaction: async (_, { input }) => {
+      try {
+        const updatedTransaction = await Transaction.findByIdAndUpdate(input.transactionId,input,{new:true});
+        return updatedTransaction;
+      } catch (error) {
+        console.error("Error in UpdateTransaction:", error);
+        throw new Error(error.message || "Internal server error");
+      }
+    },
+    deleteTransacton: async (_, { transactionId }) => {
+        try {
+            const deleteTransacton = await Transaction.findByIdAndDelete(transactionId);
+            return deleteTransacton;
+        } catch (error) {
+            console.error("Error in DeleteTransaction:", error);
+        throw new Error(error.message || "Internal server error");
+        }
+    },
+    //? Add transaction delete user relationship
+  },
+};
+export default transactionResolver;
