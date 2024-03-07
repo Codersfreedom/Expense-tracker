@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 
 const userResolver = {
   Query: {
-    authUser: async (_, _, context) => {
+    authUser: async (_,__, context) => {
       try {
         const user = await context.getUser();
         return user;
@@ -24,10 +24,10 @@ const userResolver = {
     },
   },
   Mutation: {
-    signup: async (_, { input }, context) => {
+    signUp: async (_, { input }, context) => {
       try {
         const { username, name, password, gender } = input;
-
+        console.log(username);
         if (!username || !name || !password || !gender) {
           throw new Error("All fields are required");
         }
@@ -66,23 +66,31 @@ const userResolver = {
     login: async (_, { input }, context) => {
       try {
         const { username, password } = input;
+        if(!username || !password) throw new Error("All fields are required!");
+        const findUser = await User.findOne({username});
+        if(!findUser) throw new Error("Username doesn't exists");
+
+        const validUser = await bcrypt.compare(password,findUser.password);
+        if(!validUser) throw new Error("Invalid username or password");
+
         const { user } = await context.authenticate("graphql-local", {
           username,
           password,
         });
+
         await context.login(user);
       } catch (error) {
         console.error("Error in Login:", error);
         throw new Error(error.message || "Internal server error");
       }
     },
-    logout: async (_, _, context) => {
+    logout: async (_,__,  context) => {
       try {
         await context.logout();
-        req.session.destroy((err) => {
+        context.req.session.destroy((err) => {
           if (err) throw new err();
         });
-        res.clearCookie("connect.sid");
+        context.res.clearCookie("connect.sid");
         return { message: "Logout successfully" };
       } catch (error) {
         console.error("Error in Logout:", error);

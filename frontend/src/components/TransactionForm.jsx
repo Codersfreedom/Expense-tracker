@@ -1,4 +1,9 @@
-const TransactionForm = () => {
+import { useQuery } from "@apollo/client";
+
+const TransactionForm = ({data}) => {
+
+	
+
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 

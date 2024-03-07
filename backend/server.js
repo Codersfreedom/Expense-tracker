@@ -59,7 +59,7 @@ await server.start();
 // Set up our Express middleware to handle CORS, body parsing,
 // and our expressMiddleware function.
 app.use(
-    '/',
+    '/graphql',
     cors({
       origin:process.env.BASE_URL,
       credentials:true,
