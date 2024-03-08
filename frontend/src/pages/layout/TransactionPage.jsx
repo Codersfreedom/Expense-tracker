@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
-import { Navigate, useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { GET_TRANSACTION } from "../../graphql/queries/transaction.query";
 import { UPDATE_TRANSACTION } from "../../graphql/mutations/transaction.mutation";
 import TransactionFormSkeleton from "../../components/ui/TransactionFormSkeleton"
@@ -10,11 +10,14 @@ import toast from "react-hot-toast";
 const TransactionPage = () => {
 
 	const { id } = useParams()
+	const navigate = useNavigate();
 
 	const { data, loading } = useQuery(GET_TRANSACTION, { variables: { id: id } })
-	const [UpdateTransaction, { loading: updateLoading ,error}] = useMutation(UPDATE_TRANSACTION);
+	const [UpdateTransaction, { loading: updateLoading }] = useMutation(UPDATE_TRANSACTION, {
+		refetchQueries: ["GetCategoryStatictics"]
+	});
 
-	console.log(error)
+	
 
 
 	const [formData, setFormData] = useState({
@@ -30,7 +33,7 @@ const TransactionPage = () => {
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-		if(!formData.description || !formData.paymentType || !formData.category || !formData.amount || !formData.date ){
+		if (!formData.description || !formData.paymentType || !formData.category || !formData.amount || !formData.date) {
 			return toast.error("All fields are required")
 		}
 		const amount = parseInt(formData.amount);
@@ -45,7 +48,7 @@ const TransactionPage = () => {
 				}
 			})
 			toast.success("Transaction updated successfully")
-			Navigate("/")
+			navigate("/");
 
 		} catch (error) {
 			toast.error(error.message);

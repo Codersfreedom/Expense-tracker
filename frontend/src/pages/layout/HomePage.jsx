@@ -9,6 +9,8 @@ import { useMutation, useQuery } from "@apollo/client";
 import { LOGOUT } from "../../graphql/mutations/user.mutation";
 import toast from "react-hot-toast";
 import GET_AUTH_USER from "../../graphql/queries/user.query";
+import { GET_CATEGORY_STATISTICS } from "../../graphql/queries/transaction.query";
+import { useEffect, useState } from "react";
 
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -20,6 +22,8 @@ const HomePage = () => {
 	const { data } = useQuery(GET_AUTH_USER)
 
 
+	const { data:categoryData } = useQuery(GET_CATEGORY_STATISTICS);
+
 
 
 
@@ -28,21 +32,63 @@ const HomePage = () => {
 		refetchQueries: ["GetAuthUser"],
 	});
 
-	const chartData = {
-		labels: ["Saving", "Expense", "Investment"],
+	const [chartData, setChartData] = useState({
+		labels: [],
 		datasets: [
 			{
-				label: "%",
-				data: [13, 8, 3],
-				backgroundColor: ["rgba(75, 192, 192)", "rgba(255, 99, 132)", "rgba(54, 162, 235)"],
-				borderColor: ["rgba(75, 192, 192)", "rgba(255, 99, 132)", "rgba(54, 162, 235, 1)"],
+				label: "$",
+				data: [],
+				backgroundColor: [],
+				borderColor: [],
 				borderWidth: 1,
 				borderRadius: 30,
 				spacing: 10,
 				cutout: 130,
 			},
 		],
-	};
+	});
+
+
+
+	useEffect(() => {
+		if (categoryData?.categoryStatistics) {
+			const categories = categoryData.categoryStatistics.map((stat) => stat.category);
+			const totalAmounts = categoryData.categoryStatistics.map((stat) => stat.amount);
+
+			const backgroundColors =[]
+			const borderColors =[];
+
+			categories.forEach(category =>{
+				if(category === "saving"){
+					backgroundColors.push("rgba(75,192,192)");
+					borderColors.push("rgba(75,192,192)");
+
+				}
+				else if(category === "expense"){
+					backgroundColors.push("rgba(255,99,132)");
+					borderColors.push("rgba(255,99,132)");
+
+				}
+				else if(category ==="investment"){
+					backgroundColors.push("rgba(54,162,235)");
+					borderColors.push("rgba(54,162,235)");
+				}
+			})
+
+			setChartData(prev =>({
+				labels:categories,
+				datasets:[
+					{
+						...prev.datasets[0],
+						data:totalAmounts,
+						backgroundColor:backgroundColors,
+						borderColor:borderColors
+					}
+				]
+			}))
+
+		}
+	}, [categoryData])
 
 	const handleLogout = async () => {
 		// console.log("Logging out...");
@@ -67,7 +113,7 @@ const HomePage = () => {
 						Spend wisely, track wisely
 					</p>
 					<img
-						src={data.authUser.profilePicture}
+						src={data?.authUser.profilePicture}
 						className='w-11 h-11 rounded-full border cursor-pointer'
 						alt='Avatar'
 					/>

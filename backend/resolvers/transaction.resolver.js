@@ -2,7 +2,7 @@ import Transaction from "../models/transaction.model.js";
 
 const transactionResolver = {
   Query: {
-    transactions: async (_,__, context) => {
+    transactions: async (_, __, context) => {
       try {
         if (!context.getUser()) throw new Error("Unauthorized");
         const userId = await context.getUser()._id;
@@ -16,17 +16,38 @@ const transactionResolver = {
     },
     transaction: async (_, { transactionId }) => {
       try {
-        
         const transaction = await Transaction.findById(transactionId);
         return transaction;
-        
       } catch (error) {
         console.error("Error in getting transaction:", error);
         throw new Error(error.message || "Internal server error");
       }
     },
-    //? Todo -> add categoryStatistics
+
+    categoryStatistics: async (_, __, context) => {
+      try {
+        if (!context.getUser()) throw new Error("Unauthorized");
+        const userId = context.getUser()._id;
+        const transactions = await Transaction.find({ userId });
+        const categoryMap = {};
+        console.log(transactions)
+        transactions.forEach((transaction) => {
+          if (!categoryMap[transaction.category]) {
+            categoryMap[transaction.category] = 0;
+          }
+          categoryMap[transaction.category] += transaction.amount;
+        });
+        return Object.entries(categoryMap).map(([category, amount]) => ({
+          category,
+          amount,
+        }));
+      } catch (error) {
+        console.log("Error in CategoryStatictics ", error);
+        throw new Error(error.message || "Internal server error");
+      }
+    },
   },
+
   Mutation: {
     createTransaction: async (_, { input }, context) => {
       try {
@@ -43,10 +64,14 @@ const transactionResolver = {
       }
     },
     updateTransaction: async (_, { input }) => {
-      console.log(input)
+      console.log(input);
       try {
-        const updatedTransaction = await Transaction.findByIdAndUpdate(input.transactionId,input,{new:true});
-        console.log(updatedTransaction)
+        const updatedTransaction = await Transaction.findByIdAndUpdate(
+          input.transactionId,
+          input,
+          { new: true }
+        );
+        console.log(updatedTransaction);
         return updatedTransaction;
       } catch (error) {
         console.error("Error in UpdateTransaction:", error);
@@ -54,14 +79,16 @@ const transactionResolver = {
       }
     },
     deleteTransaction: async (_, { transactionId }) => {
-        try {
-          console.log(transactionId);
-            const deleteTransacton = await Transaction.findByIdAndDelete(transactionId);
-            return deleteTransacton;
-        } catch (error) {
-            console.error("Error in DeleteTransaction:", error);
+      try {
+        console.log(transactionId);
+        const deleteTransacton = await Transaction.findByIdAndDelete(
+          transactionId
+        );
+        return deleteTransacton;
+      } catch (error) {
+        console.error("Error in DeleteTransaction:", error);
         throw new Error(error.message || "Internal server error");
-        }
+      }
     },
     //? Add transaction delete user relationship
   },

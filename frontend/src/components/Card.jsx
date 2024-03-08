@@ -27,7 +27,7 @@ const Card = ({ transaction }) => {
 	paymentType = paymentType[0]?.toUpperCase() + paymentType.slice(1);
 
 	const [DeleteTransaction,{loading}] = useMutation(DELETE_TRANSACTION,{
-		refetchQueries:["GetTransactions"]
+		refetchQueries:["GetTransactions","GetCategoryStatictics"]
 	});
 	
 	const handleDelete = async()=>{
@@ -70,7 +70,7 @@ const Card = ({ transaction }) => {
 				</p>
 				<p className='text-white flex items-center gap-1'>
 					<FaLocationDot />
-					Location: {transaction.location || N/A}
+					Location: {transaction.location || "N/A"}
 				</p>
 				<div className='flex justify-between items-center'>
 					<p className='text-xs text-black font-bold'>{formatedDate}</p>
