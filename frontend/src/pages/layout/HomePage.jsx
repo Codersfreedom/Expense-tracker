@@ -22,7 +22,7 @@ const HomePage = () => {
 	const { data } = useQuery(GET_AUTH_USER)
 
 
-	const { data:categoryData } = useQuery(GET_CATEGORY_STATISTICS);
+	const { data: categoryData } = useQuery(GET_CATEGORY_STATISTICS);
 
 
 
@@ -55,34 +55,34 @@ const HomePage = () => {
 			const categories = categoryData.categoryStatistics.map((stat) => stat.category);
 			const totalAmounts = categoryData.categoryStatistics.map((stat) => stat.amount);
 
-			const backgroundColors =[]
-			const borderColors =[];
+			const backgroundColors = []
+			const borderColors = [];
 
-			categories.forEach(category =>{
-				if(category === "saving"){
+			categories.forEach(category => {
+				if (category === "saving") {
 					backgroundColors.push("rgba(75,192,192)");
 					borderColors.push("rgba(75,192,192)");
 
 				}
-				else if(category === "expense"){
+				else if (category === "expense") {
 					backgroundColors.push("rgba(255,99,132)");
 					borderColors.push("rgba(255,99,132)");
 
 				}
-				else if(category ==="investment"){
+				else if (category === "investment") {
 					backgroundColors.push("rgba(54,162,235)");
 					borderColors.push("rgba(54,162,235)");
 				}
 			})
 
-			setChartData(prev =>({
-				labels:categories,
-				datasets:[
+			setChartData(prev => ({
+				labels: categories,
+				datasets: [
 					{
 						...prev.datasets[0],
-						data:totalAmounts,
-						backgroundColor:backgroundColors,
-						borderColor:borderColors
+						data: totalAmounts,
+						backgroundColor: backgroundColors,
+						borderColor: borderColors
 					}
 				]
 			}))
@@ -91,7 +91,6 @@ const HomePage = () => {
 	}, [categoryData])
 
 	const handleLogout = async () => {
-		// console.log("Logging out...");
 
 		try {
 			await logout();
@@ -118,13 +117,17 @@ const HomePage = () => {
 						alt='Avatar'
 					/>
 					{!loading && <MdLogout className='mx-2 w-5 h-5 cursor-pointer' onClick={handleLogout} />}
-					{/* loading spinner */}
+
 					{loading && <div className='w-6 h-6 border-t-2 border-b-2 mx-2 rounded-full animate-spin'></div>}
 				</div>
+
 				<div className='flex flex-wrap w-full justify-center items-center gap-6'>
-					<div className='h-[330px] w-[330px] md:h-[360px] md:w-[360px]  '>
-						<Doughnut data={chartData} />
-					</div>
+					{categoryData?.categoryStatistics.length > 0 && (
+						<div className='h-[330px] w-[330px] md:h-[360px] md:w-[360px]  '>
+							<Doughnut data={chartData} />
+						</div>
+
+					)}
 
 					<TransactionForm />
 				</div>
