@@ -16,8 +16,10 @@ const transactionResolver = {
     },
     transaction: async (_, { transactionId }) => {
       try {
+        
         const transaction = await Transaction.findById(transactionId);
         return transaction;
+        
       } catch (error) {
         console.error("Error in getting transaction:", error);
         throw new Error(error.message || "Internal server error");
@@ -41,16 +43,19 @@ const transactionResolver = {
       }
     },
     updateTransaction: async (_, { input }) => {
+      console.log(input)
       try {
         const updatedTransaction = await Transaction.findByIdAndUpdate(input.transactionId,input,{new:true});
+        console.log(updatedTransaction)
         return updatedTransaction;
       } catch (error) {
         console.error("Error in UpdateTransaction:", error);
         throw new Error(error.message || "Internal server error");
       }
     },
-    deleteTransacton: async (_, { transactionId }) => {
+    deleteTransaction: async (_, { transactionId }) => {
         try {
+          console.log(transactionId);
             const deleteTransacton = await Transaction.findByIdAndDelete(transactionId);
             return deleteTransacton;
         } catch (error) {

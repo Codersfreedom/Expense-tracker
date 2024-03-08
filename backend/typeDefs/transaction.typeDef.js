@@ -8,17 +8,18 @@ type Transaction{
     amount:Float!
     location:String
     date:String!
+    user:User!
 }
 
 type Query{
     transactions:[Transaction!]
-    transaction(transactionId:ID!):Transaction
+    transaction(transactionId:ID!):Transaction!
 
 }
 type Mutation{
     createTransaction(input:createTransactionInput!):Transaction!
     updateTransaction(input:updateTransactionInput!):Transaction!
-    deleteTransacton(transactionId:ID!):Transaction!
+    deleteTransaction(transactionId:ID!):Transaction!
 }
 input createTransactionInput {
     description:String!
@@ -37,10 +38,7 @@ input updateTransactionInput {
     location:String
     date:String
 }
-input deleteTransacton {
-    transactionId:ID!
-    message:String!
-}
+
 `
 
 export default transactionTypeDef;

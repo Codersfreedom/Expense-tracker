@@ -10,13 +10,21 @@ import { LOGOUT } from "../../graphql/mutations/user.mutation";
 import toast from "react-hot-toast";
 import GET_AUTH_USER from "../../graphql/queries/user.query";
 
+
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const HomePage = () => {
 
-	const {data} = useQuery(GET_AUTH_USER)
 
-	const [logout,{loading,client}] = useMutation(LOGOUT,{
+
+	const { data } = useQuery(GET_AUTH_USER)
+
+
+
+
+
+
+	const [logout, { loading, client }] = useMutation(LOGOUT, {
 		refetchQueries: ["GetAuthUser"],
 	});
 
@@ -43,13 +51,13 @@ const HomePage = () => {
 			await logout();
 			client.resetStore();
 		} catch (error) {
-			console.log("Error in logging out:",error);
+			console.log("Error in logging out:", error);
 			toast.error(error.message);
 		}
 
 	};
 
-	
+
 
 	return (
 		<>
@@ -72,7 +80,7 @@ const HomePage = () => {
 						<Doughnut data={chartData} />
 					</div>
 
-					<TransactionForm data = {data} />
+					<TransactionForm />
 				</div>
 				<Cards />
 			</div>

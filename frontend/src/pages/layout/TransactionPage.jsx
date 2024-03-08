@@ -1,18 +1,58 @@
-import { useState } from "react";
+import { useMutation, useQuery } from "@apollo/client";
+import { useEffect, useState } from "react";
+import { Navigate, useParams } from "react-router-dom"
+import { GET_TRANSACTION } from "../../graphql/queries/transaction.query";
+import { UPDATE_TRANSACTION } from "../../graphql/mutations/transaction.mutation";
+import TransactionFormSkeleton from "../../components/ui/TransactionFormSkeleton"
+import toast from "react-hot-toast";
+
 
 const TransactionPage = () => {
+
+	const { id } = useParams()
+
+	const { data, loading } = useQuery(GET_TRANSACTION, { variables: { id: id } })
+	const [UpdateTransaction, { loading: updateLoading ,error}] = useMutation(UPDATE_TRANSACTION);
+
+	console.log(error)
+
+
 	const [formData, setFormData] = useState({
-		description: "",
-		paymentType: "",
-		category: "",
-		amount: "",
-		location: "",
+		description: data?.transaction?.description || "",
+		paymentType: data?.transaction?.paymentType || "",
+		category: data?.transaction?.category || "",
+		amount: data?.transaction?.amount || "",
+		location: data?.transaction?.location || "",
 		date: "",
 	});
 
+
+
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-		console.log("formData", formData);
+		if(!formData.description || !formData.paymentType || !formData.category || !formData.amount || !formData.date ){
+			return toast.error("All fields are required")
+		}
+		const amount = parseInt(formData.amount);
+		try {
+			await UpdateTransaction({
+				variables: {
+					input: {
+						...formData,
+						amount,
+						transactionId: id
+					}
+				}
+			})
+			toast.success("Transaction updated successfully")
+			Navigate("/")
+
+		} catch (error) {
+			toast.error(error.message);
+		}
+
+
+
 	};
 	const handleInputChange = (e) => {
 		const { name, value } = e.target;
@@ -22,7 +62,21 @@ const TransactionPage = () => {
 		}));
 	};
 
-	// if (loading) return <TransactionFormSkeleton />;
+	useEffect(() => {
+		if (data) {
+			setFormData({
+
+				description: data?.transaction?.description,
+				paymentType: data?.transaction?.paymentType,
+				category: data?.transaction?.category,
+				amount: data?.transaction?.amount,
+				location: data?.transaction?.location,
+				date: new Date(+data?.transaction?.date).toISOString().substr(0, 10),
+			})
+		}
+	}, [data])
+
+	if (loading) return <TransactionFormSkeleton />;
 
 	return (
 		<div className='h-screen max-w-4xl mx-auto flex flex-col items-center'>
@@ -82,7 +136,7 @@ const TransactionPage = () => {
 						</div>
 					</div>
 
-					{/* CATEGORY */}
+					{ }
 					<div className='w-full flex-1 mb-6 md:mb-0'>
 						<label
 							className='block uppercase tracking-wide text-white text-xs font-bold mb-2'
@@ -176,8 +230,9 @@ const TransactionPage = () => {
 					className='text-white font-bold w-full rounded px-4 py-2 bg-gradient-to-br
           from-pink-500 to-pink-500 hover:from-pink-600 hover:to-pink-600'
 					type='submit'
+					disabled={updateLoading}
 				>
-					Update Transaction
+					{updateLoading ? "Loading..." : "Update Transaction"}
 				</button>
 			</form>
 		</div>
