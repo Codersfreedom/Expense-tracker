@@ -75,7 +75,7 @@ const Login = () => {
 										disabled:opacity-50 disabled:cursor-not-allowed'
 										disabled={loading}
 									>
-									{loading ? "Loading...":"Login"}
+									{loading ? <div className="w-6 h-6 border-t-2 border-b-2 rounded-full animate-spin"></div>:"Login"}
 								</button>
 							</div>
 						</form>

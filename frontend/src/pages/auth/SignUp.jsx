@@ -104,7 +104,7 @@ const SignUp = () => {
 									disabled={loading}
 									
 								>
-									{loading ? "Loading..." : "Sign Up"}
+									{loading ? <div className="w-6 h-6 border-t-2 border-b-2 rounded-full animate-spin"></div> : "Sign Up"}
 								</button>
 							</div>
 						</form>

@@ -17,13 +17,15 @@ import mergedTypeDef from "./typeDefs/index.js";
 import mergedResolvers from "./resolvers/index.js";
 import connectDb from "./db/connectDb.js";
 import { configurePassport } from './passport/passport.js';
+import path from 'path';
 
 dotenv.config();
 configurePassport();
 
+const __dirname = path.resolve();
+
 const app = express();
 const httpServer = http.createServer(app);
-
 const MongoDBSore = connectMongo(session);
 
 const store = new MongoDBSore({
@@ -72,6 +74,12 @@ app.use(
     }),
   );
   
+app.use(express.static(path.join(__dirname,"frontend/dist")));
+
+app.get("*",(req,res)=>{
+  res.sendFile(path.join(__dirname,"frontend/dist","index.html"));
+})
+
   // Modified server startup
   await new Promise((resolve) => httpServer.listen({ port: 4000 }, resolve));
   await connectDb();
